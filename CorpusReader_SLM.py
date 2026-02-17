@@ -74,8 +74,21 @@ class CorpusReader_SLM():
                 self.trigram_probs = {" ".join(trigram): count / self.bigram_counts[" ".join(trigram[:2])] for trigram, count in self.trigram_counts.items()}
 
     # Class methods
-    def unigram(count = 0):
-        pass
+    def unigram(self, count = 0):
+        # self.unigram_probs -- dictionary containing unigram probabilities, {key: value} as {word: probability}
+        # self.unigram_counts -- counter object, ie a dictionary containing unigram frequency, {key: value} as {word: count}
+
+        if count > 0:
+            # sort by probability in descending order, then select by highest probability
+            sorted_by_prob = sorted(self.unigram_probs.items(), key=lambda x: x[1], reverse=True)
+            selected_items = sorted_by_prob[:count]
+        else:
+            # use all unigrams
+            selected_items = list(self.unigram_probs.items())
+        
+        # sort alphabetically by word
+        result = sorted(selected_items, key=lambda x: x[0])
+        return result
 
     def bigram(count = 0):
         pass
