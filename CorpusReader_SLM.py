@@ -120,8 +120,89 @@ class CorpusReader_SLM():
         result = sorted(selected_items, key=lambda x: x[0])
         return result
 
-    def unigramGenerate(code = 0, head= []):
-        pass
+    def unigramGenerate(self, code = 0, head = []):
+
+        # Return empty list if code is not 0, 1, or 2
+        if code not in [0,1,2]:
+            return []
+
+        generatedSentence = list(head) if head else []
+
+        # Iterate until ending punctuation is appended, or if generatedSentence is initially empty
+        while not generatedSentence or generatedSentence[-1] not in [".", "!", "?"]:
+
+            if code == 0:
+
+                # Find the highest probability from the unigram distribution
+                highestProbability = max(self.unigram_probs.values())
+
+                # Create a list that stores all tiebreaker words (if there is a tiebreaker, else returns only element)
+                tiebreakerValues = [key for key, value in self.unigram_probs.items() if value == highestProbability]
+
+                # Ternary to return a random choice from tiebreaker words if more than 1 element exists, else return only element
+                selectedWord = random.choice(tiebreakerValues) if len(tiebreakerValues) > 1 else tiebreakerValues[0]
+                
+            elif code == 1:
+
+                # Stores non-zero probas in a new dictionairy
+                nonZeroProbaDict = {word: probability for word, probability in self.unigram_probs.items() if probability != 0}
+
+                words = list(nonZeroProbaDict.keys())
+                probabilities = list(nonZeroProbaDict.values())
+
+                # Normalize probabilities
+                totalProba = sum(probabilities)
+                probabilities = [p / totalProba for p in probabilities]
+
+                # Selected a random word using weighted sampling (probability of selecting word w, is based on w's probability)
+                # Assumes probas sum to 1 in the unigram_probs dict
+                selectedWord = np.random.choice(words, p=probabilities)
+                
+            elif code == 2:
+
+                # Stores list of tuples ('word', 'probability') in descending order
+                sortedProbas = sorted(self.unigram_probs.items(), key=lambda x: x[1], reverse=True)
+
+                
+                if len(sortedProbas) <= 10:
+                    probasToUse = sortedProbas
+                else:
+                    # Maps to 10th word's probability
+                    lastProbaTiebreaker = sortedProbas[9][1]
+                    probasToUse = [p for p in sortedProbas if p[1] >= lastProbaTiebreaker]
+
+                # Store words, and probabilities
+                words = [word for word, proba in probasToUse]
+                probabilities = [proba for word, proba in probasToUse]
+
+                # Find scalar to normalize probabilities
+                probScale = 1 / sum(probabilities)
+
+                # Normalize probas
+                normalizedProbabilities = [probScale * p for p in probabilities]
+
+                # Pick random element using weighted sampling
+                selectedWord = np.random.choice(words, p=normalizedProbabilities)
+
+            # Append selected token
+            generatedSentence.append(selectedWord)
+
+        
+        formattedSentence = ""
+
+        for idx, token in enumerate(generatedSentence):
+            
+            if token in [",", ".", "!", "?"]:
+                formattedSentence += token
+            else:
+                if idx == 0:
+                    formattedSentence += token
+                else:
+                    formattedSentence += f" {token}"
+
+
+        # Missing formatting
+        return formattedSentence
 
     def bigramGenerate(code = 0, head= []):
         pass
