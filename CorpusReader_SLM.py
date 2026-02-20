@@ -41,6 +41,10 @@ class CorpusReader_SLM():
                     if self.stemmer:
                         word = self.stemmer.stem(word)
                     processed_sent.append(word)
+            if trigram:
+                processed_sent = ['<s>', '<s>'] + processed_sent + ['</s>']
+            else:
+                processed_sent = ['<s>'] + processed_sent + ['</s>']
             # Update ngram counts
             self.unigram_counts.update(processed_sent)
             self.bigram_counts.update(ngrams(processed_sent, 2))
@@ -65,13 +69,15 @@ class CorpusReader_SLM():
                 for trigram, count in self.trigram_counts.items():
                     trigram_str = " ".join(trigram)
                     bigram_str = " ".join(trigram[:2])
-                    self.trigram_probs[trigram_str] = (count + 1) / (self.bigram_counts[bigram_str] + V)
+                    self.trigram_probs[trigram_str] = (count + 1) / (self.bigram_counts[(trigram[0], trigram[1])] + V)
         else:
+            total_unigrams = sum(self.unigram_counts.values())
             # probabilities without smoothing
-            self.unigram_probs = {word: count / sum(self.unigram_counts.values()) for word, count in self.unigram_counts.items()}
+            self.unigram_probs = {word: count / total_unigrams for word, count in self.unigram_counts.items()}
             self.bigram_probs = {" ".join(bigram): count / self.unigram_counts[bigram[0]] for bigram, count in self.bigram_counts.items()}
             if trigram:
-                self.trigram_probs = {" ".join(trigram): count / self.bigram_counts[" ".join(trigram[:2])] for trigram, count in self.trigram_counts.items()}
+                self.trigram_probs = {" ".join(trigram): count / self.bigram_counts[(trigram[0], trigram[1])]
+                for trigram, count in self.trigram_counts.items()}
 
     # Class methods
     def unigram(self, count = 0):
