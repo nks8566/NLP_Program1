@@ -30,14 +30,15 @@ if reader.trigram_flag:
         print(trigram_str, count, round(reader.trigram_probs[trigram_str], 6))
 
 # Test the unigram function (returns x number of unigrams by probability)
-print("\nTop 5 unigrams by probability:")
-for word, prob in reader.unigram(5):
-    print(word, round(prob, 4))
-
 print("\nTop 10 unigrams by probability:")
 for word, prob in reader.unigram(10):
     print(word, round(prob, 4))
 
-print("\nTop 20 unigrams by probability:")
-for word, prob in reader.unigram(20):
-    print(word, round(prob, 4))
+# Test the bigram function (returns all, or x number of bigrams by probability
+print("\nTop 5 bigrams by probability:")
+for bigram_str, prob in reader.bigram(5):
+    print(bigram_str, round(prob, 4))
+
+print("\nTop 200 trigrams by probability:")
+for trigram_str, prob in reader.trigram(200):
+    print(trigram_str, round(prob, 6))  

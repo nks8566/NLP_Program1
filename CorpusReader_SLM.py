@@ -96,11 +96,29 @@ class CorpusReader_SLM():
         result = sorted(selected_items, key=lambda x: x[0])
         return result
 
-    def bigram(count = 0):
-        pass
+    def bigram(self, count = 0):
+        if count > 0:
+            # sort by probability in descending order, then select by highest probability
+            sorted_by_prob = sorted(self.bigram_probs.items(), key=lambda x: x[1], reverse=True)
+            selected_items = sorted_by_prob[:count]
+        else:
+            # use all bigrams
+            selected_items = list(self.bigram_probs.items())
+        
+        # sort alphabetically by word
+        result = sorted(selected_items, key=lambda x: x[0])
+        return result
 
-    def trigram(count = 0):
-        pass
+    def trigram(self, count = 0):
+        if count > 0:
+            sorted_by_prob = sorted(self.trigram_probs.items(), key=lambda x: x[1], reverse=True)
+            selected_items = sorted_by_prob[:count]
+        else:
+            selected_items = list(self.trigram_probs.items())
+
+        # sort alphabetically by word
+        result = sorted(selected_items, key=lambda x: x[0])
+        return result
 
     def unigramGenerate(code = 0, head= []):
         pass
