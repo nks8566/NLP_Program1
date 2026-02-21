@@ -1,4 +1,7 @@
 
+import random
+import numpy as np
+
 import nltk
 from nltk.util import ngrams  
 from nltk.corpus import stopwords
