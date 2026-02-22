@@ -1,7 +1,8 @@
 from nltk.corpus import PlaintextCorpusReader, treebank
 from CorpusReader_SLM import *
 
-
+#import nltk
+#nltk.download('treebank')
 
 
 '''
@@ -33,17 +34,42 @@ print(myCorpus.unigramGenerate(10, [This]))
 #
 #  
 
-rootDir = '_temp1'   # change that to the directory where the files are
+# rootDir = '_temp1'   # change that to the directory where the files are
 
-newCorpus = PlaintextCorpusReader(rootDir, '.*txt')
-x = newCorpus.sents()
-for y in x:
-    print(y)
+# newCorpus = PlaintextCorpusReader(rootDir, '.*txt')
+# x = newCorpus.sents()
+# for y in x:
+#     print(y)
 
-'''
-myC2 = CorpusReader_TFIDF(newCorpus)
+# '''
+# myC2 = CorpusReader_TFIDF(newCorpus)
 
 
-print("-----\n")
+# print("-----\n")
 
-'''
+# '''
+
+from nltk.corpus import treebank
+
+myCorpus = CorpusReader_SLM(treebank)
+
+print("########## UNIGRAM ##########")
+print(myCorpus.unigram(10))
+
+print("########## BIGRAM ##########")
+print(myCorpus.bigram(10))
+
+print("########## UNIGRAM GENERATE (code 0) ##########")
+print(myCorpus.unigramGenerate(0))
+
+print("########## UNIGRAM GENERATE (code 1) ##########")
+print(myCorpus.unigramGenerate(1))
+
+print("########## UNIGRAM GENERATE (code 2) ##########")
+print(myCorpus.unigramGenerate(2))
+
+print("########## BIGRAM GENERATE ##########")
+print(myCorpus.bigramGenerate(1))
+
+print("########## TRIGRAM GENERATE ##########")
+print(myCorpus.trigramGenerate(1))

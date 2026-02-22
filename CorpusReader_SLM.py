@@ -67,8 +67,8 @@ class CorpusReader_SLM():
                 bigram_str = " ".join(bigram)
                 self.bigram_probs[bigram_str] = (count + 1) / (self.unigram_counts[bigram[0]] + V)
             # trigram: if true, calculate and store trigram probabilities in addition to unigram and bigrams.
+            self.trigram_probs = {}
             if trigram:
-                self.trigram_probs = {}
                 for trigram, count in self.trigram_counts.items():
                     trigram_str = " ".join(trigram)
                     bigram_str = " ".join(trigram[:2])
@@ -78,6 +78,7 @@ class CorpusReader_SLM():
             # probabilities without smoothing
             self.unigram_probs = {word: count / total_unigrams for word, count in self.unigram_counts.items()}
             self.bigram_probs = {" ".join(bigram): count / self.unigram_counts[bigram[0]] for bigram, count in self.bigram_counts.items()}
+            self.trigram_probs = {}
             if trigram:
                 self.trigram_probs = {" ".join(trigram): count / self.bigram_counts[(trigram[0], trigram[1])]
                 for trigram, count in self.trigram_counts.items()}
@@ -132,10 +133,11 @@ class CorpusReader_SLM():
         generatedSentence = list(head) if head else []
 
         # Added to remove <s> start token from sentence generation
-        validUnigrams = { w: p for w, p in self.unigram_probs() if w != "<s>"}
+        validUnigrams = { w: p for w, p in self.unigram_probs.items() if w != "<s>"}
 
         # Iterate until ending punctuation is appended, or if generatedSentence is initially empty
-        while not generatedSentence or generatedSentence[-1] not in [".", "!", "?"]:
+        max_length = 30
+        while not generatedSentence or (generatedSentence[-1] not in [".", "!", "?"] and len(generatedSentence) < max_length):
 
             if code == 0:
 
@@ -221,7 +223,8 @@ class CorpusReader_SLM():
         generatedSentence = list(head) if head else ["<s>"]
 
         # Iterate until ending punctuation is appended, or if generatedSentence is initially empty
-        while not generatedSentence or generatedSentence[-1] not in [".", "!", "?", "</s>"]:
+        max_length = 30
+        while not generatedSentence or (generatedSentence[-1] not in [".", "!", "?", "</s>"] and len(generatedSentence) < max_length):
 
             # Sample previous generated word, as bigram generation is dependent on the last word used
             previous = generatedSentence[-1]
@@ -326,14 +329,15 @@ class CorpusReader_SLM():
         generatedSentence = list(head) if head else ["<s>", "<s>"]
 
         # Iterate until ending punctuation is appended, or if generatedSentence is initially empty
-        while not generatedSentence or generatedSentence[-1] not in [".", "!", "?", "</s>"]:
+        max_length = 30
+        while not generatedSentence or generatedSentence[-1] not in [".", "!", "?", "</s>"] and len(generatedSentence) < max_length:
 
             # Sample previous generated word, as trigram generation is dependent on the last word used
             previousTwo = tuple(generatedSentence[-2:])
 
             # Returns dict of valid trigrams that we can sample from 
             # Given "southern methodist university", it will split and store the last word (used for sentence generation) and filter so that we only sample trigrams where the first two words were the previous two in generatedSentence
-            validTrigrams = { trigram.split()[2]: p for trigram, p in self.trigram_probs.items() if tuple(trigram.split()[:2]) == previousTwo }
+            validTrigrams = {trigram.split()[2]: p for trigram, p in self.trigram_probs.items() if tuple(trigram.split()[:2]) == tuple(previousTwo)}
 
             # Exit if no validTrigrams to sample from
             if not validTrigrams:
