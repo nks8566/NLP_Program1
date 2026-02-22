@@ -51,7 +51,7 @@ print(myCorpus.unigramGenerate(10, [This]))
 
 from nltk.corpus import treebank
 
-myCorpus = CorpusReader_SLM(treebank)
+myCorpus = CorpusReader_SLM(treebank, trigram=True)
 
 print("########## UNIGRAM ##########")
 print(myCorpus.unigram(10))
